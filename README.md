@@ -1,4 +1,4 @@
 yellow-pages-scraper
 ====================
 
-scraper for the yellow pages
+scraper for the yellow pages website. 
