@@ -53,15 +53,45 @@ def print2(x,i=0):
     return d
 
 
-#print   # body
-#thrift-stores
+def page(url):
+    data = g(url)
+#    print data
+    string = StringIO(data)
+    tree = etree.parse(string,parser)
+    r= tree.getroot()   
+    for f in r.findall('.//span'):        
+        t = f.text
+        if (t):
+            print t.encode("ascii","replace")
+
+    for f in r.findall('.//a'):        
+        #print f
+        h = f.get('href') 
+        #print h
+
+seen={}
+
 #response1 = br.find_link(text_regex=r"pawn-shops", nr=1)
-def t():
-    data = g('http://www.yellowpages.com/lawrence-ks/thrift-stores')
+def t(url):
+    #url like 'http://www.yellowpages.com/lawrence-ks/thrift-stores'
+    if url.find('gallery?lid=')> 0:
+        return
+    print "going to get %s" % url
+    data = g(url)
     tree = etree.parse(StringIO(data),parser)
     #body/div/div/div/div/div/div/div/ul/li/a/div/div[3]/div[2]/div/span/span
     r= tree.getroot()   
 #    for e in r.findall('.//div[@data-lid]'):
+
+    for f in r.findall('.//a'):        
+        h = f.get('href') 
+        if h:
+            if h not in seen:
+                if h.find("/lawrence") ==0:
+                    print h
+                    seen[h]=1
+                    t("http://www.yellowpages.com" + h)
+                #page(h)
 
 #    for e in r.findall('.//div[@class="info-business"]'):
 #    for e in r.findall('.//div[@class="info-business-wrapper"]'):
@@ -70,29 +100,33 @@ def t():
         classn = e.get('class')
         #        if sid.find("data-lid")==0:
         #            print "===1---"
-        print "SID:%s" % sid
-        print "class:%s" % classn
-        print(print2 (e))
+        #print "SID:%s" % sid
+        #print "class:%s" % classn
+        #print(print2 (e))
 
-# ATTRIB {'class': 'business-categories'}
-# ATTRIB {'class': 'business-phone phone'}
-# ATTRIB {'class': 'categories ellipsis'}
-# ATTRIB {'class': 'city-state'}
-# ATTRIB {'class': 'info-business'}
-# ATTRIB {'class': 'info-business-additional'}
-# ATTRIB {'class': 'info-business-wrapper'}
-# ATTRIB {'class': 'listing-address adr'}
-# ATTRIB {'class': 'locality'}
-# ATTRIB {'class': 'postal-code'}
-# ATTRIB {'class': 'region'}
-# ATTRIB {'class': 'srp-business-name'}
-# ATTRIB {'class': 'street-address'}
-# ATTRIB {'class': 'what-where'}
-# ATTRIB {'data-lid': '461709198', 'class': 'business-name fn org'}
+        for f in e.findall('.//a'):        
+            h = f.get('href') 
+            if h.find("lid") > 0:
+                if h.find(sid) > 0:
+                    if h.find("http") == 0:
+                        if h not in seen:
+                            print h
+                            seen[h]=1
+                            page(h)
 
 
+#t()
 
-#            print e.tostring()
-            #print ElementTree.tostring(e)
+def cats():
+    seen={}
+    data = g('http://www.yellowpages.com/lawrence-ks')
+    tree = etree.parse(StringIO(data),parser)
+    r= tree.getroot()   
+    for e in r.findall('.//a[@href]'):
+        h = e.get('href') 
+        if h.find("/lawrence-ks/") ==0:
+            if h not in seen:
+                seen[h]=1
+                t("http://www.yellowpages.com" + h)
 
-t()
+cats()
